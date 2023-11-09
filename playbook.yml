@@ -1,0 +1,28 @@
+---
+- hosts: all
+  tasks:
+  - name: Create a Sample Demo WebSite directory structure
+    ansible.windows.win_file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - C:\wwwroot\websites\demo
+      - C:\IIS-LOGS\websites\demo
+
+  - name: Install IIS (Web-Server and Web-Common-Http)
+    ansible.windows.win_feature:
+      name:
+      - Web-Server
+      - Web-Common-Http
+      state: present
+
+  - name: Creating Sample Demo WebSite with Custom Log location, Format 3WC and rolling over every hour
+    community.windows.win_iis_website:
+      name: SampleDemoWebSite
+      state: started
+      port: 80
+      ip: '*'
+      hostname: '*'
+      physical_path: C:\wwwroot\websites\demo
+      parameters: logfile.directory:C:\IIS-LOGS\websites\demo|logfile.period:Hourly|logFile.logFormat:W3C
+      application_pool: demo
